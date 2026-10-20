@@ -34,6 +34,12 @@ export function proxy(request: NextRequest) {
   // On the customer/client side (localhost / non-admin host):
   // If attempting to access '/admin', redirect to the dedicated admin subdomain
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    // Vercel default domains (*.vercel.app) do not support wildcard subdomains.
+    // Allow direct access to /admin on vercel.app deployments.
+    if (hostname.endsWith('.vercel.app')) {
+      return NextResponse.next()
+    }
+
     const port = request.nextUrl.port ? `:${request.nextUrl.port}` : ''
     const protocol = request.nextUrl.protocol || 'http:'
 
