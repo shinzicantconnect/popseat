@@ -22,11 +22,11 @@ function getStripe() {
 // bookings even without a user session (the request comes from Stripe servers).
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SERVICE_ROLE
 
   if (!url || !key) {
     throw new Error(
-      'NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not configured.'
+      'NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY (or SERVICE_ROLE) is not configured.'
     )
   }
 
