@@ -36,8 +36,10 @@ export async function addMovie(input: AddMovieInput | FormData) {
             durationMinutes = parseInt(rawDuration || '120', 10) || 120
             genre = (input.get('genre') as string) || 'General Cinema'
             const posterFile = input.get('poster') as File | null
-            showtimeDate = (input.get('showtimeDate') as string) || ''
-            showtimeTime = (input.get('showtimeTime') as string) || ''
+            // Support both combined datetime-local and separate date/time fields
+            const startTime = (input.get('start_time') as string) || ''
+            showtimeDate = (input.get('showtimeDate') as string) || (startTime ? startTime.split('T')[0] : '')
+            showtimeTime = (input.get('showtimeTime') as string) || (startTime ? startTime.split('T')[1]?.slice(0, 5) : '')
             ticketPrice = parseFloat((input.get('ticketPrice') as string) || '300')
             cinemaHall = (input.get('cinemaHall') as string) || 'Auditorium 1'
 

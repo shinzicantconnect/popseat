@@ -33,6 +33,7 @@ export default function AdminPage() {
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [posterFile, setPosterFile] = useState<File | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   // --- Coming Soon state ---
@@ -40,6 +41,7 @@ export default function AdminPage() {
   const [isCSOpen, setIsCSOpen] = useState(false)
   const [isCSSubmitting, setIsCSSubmitting] = useState(false)
   const [csPreviewUrl, setCsPreviewUrl] = useState<string | null>(null)
+  const [csPosterFile, setCsPosterFile] = useState<File | null>(null)
   const [deletingCSId, setDeletingCSId] = useState<string | null>(null)
 
   const [customerUrl, setCustomerUrl] = useState('/')
@@ -94,6 +96,7 @@ export default function AdminPage() {
     if (result.success) {
       setIsOpen(false)
       setPreviewUrl(null)
+      setPosterFile(null)
       ;(e.target as HTMLFormElement).reset()
       // Refetch movies list after successful add
       const supabase = createClient()
@@ -130,6 +133,7 @@ export default function AdminPage() {
     if (result.success) {
       setIsCSOpen(false)
       setCsPreviewUrl(null)
+      setCsPosterFile(null)
       ;(e.target as HTMLFormElement).reset()
       // Refetch coming soon list after successful add
       const supabase = createClient()
@@ -429,7 +433,7 @@ export default function AdminPage() {
               <h2 className="text-lg font-black text-white">Add New Movie</h2>
               <button
                 type="button"
-                onClick={() => { setIsOpen(false); setPreviewUrl(null) }}
+                onClick={() => { setIsOpen(false); setPreviewUrl(null); setPosterFile(null) }}
                 className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-zinc-800 transition cursor-pointer"
               >
                 <X className="h-5 w-5" />
@@ -469,7 +473,7 @@ export default function AdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Duration (min)</label>
                   <input
-                    name="duration_minutes"
+                    name="durationMinutes"
                     type="number"
                     min={1}
                     placeholder="120"
@@ -479,20 +483,47 @@ export default function AdminPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Poster Image URL</label>
-                <div className="flex gap-2">
-                  <input
-                    name="poster_url"
-                    type="url"
-                    placeholder="https://…"
-                    onChange={(e) => setPreviewUrl(e.target.value || null)}
-                    className="flex-1 px-3 py-2.5 rounded-xl bg-black border border-zinc-800 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-red-600 transition"
-                  />
-                </div>
+                <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Movie Poster</label>
+                <label
+                  htmlFor="poster-upload-movie"
+                  className="flex flex-col items-center justify-center w-full h-32 rounded-xl border-2 border-dashed border-zinc-700 hover:border-red-600 bg-black cursor-pointer transition group"
+                >
+                  {previewUrl ? (
+                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover rounded-xl" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-neutral-500 group-hover:text-neutral-300 transition">
+                      <ImageIcon className="h-8 w-8" />
+                      <span className="text-xs font-semibold">Click to upload poster</span>
+                      <span className="text-[10px]">JPG, PNG, WEBP</span>
+                    </div>
+                  )}
+                </label>
+                <input
+                  id="poster-upload-movie"
+                  name="poster"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null
+                    setPosterFile(file)
+                    if (file) {
+                      const reader = new FileReader()
+                      reader.onload = (ev) => setPreviewUrl(ev.target?.result as string)
+                      reader.readAsDataURL(file)
+                    } else {
+                      setPreviewUrl(null)
+                    }
+                  }}
+                />
                 {previewUrl && (
-                  <div className="mt-2 rounded-xl overflow-hidden border border-zinc-800 w-24 h-32">
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" onError={() => setPreviewUrl(null)} />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setPreviewUrl(null); setPosterFile(null) }}
+                    className="text-[10px] text-rose-400 hover:text-rose-300 font-semibold transition cursor-pointer"
+                  >
+                    Remove poster
+                  </button>
                 )}
               </div>
 
@@ -515,7 +546,7 @@ export default function AdminPage() {
                       <Building className="inline h-3 w-3 mr-1" />Hall Name
                     </label>
                     <input
-                      name="hall_name"
+                      name="cinemaHall"
                       placeholder="e.g. Hall 1"
                       className="w-full px-3 py-2.5 rounded-xl bg-black border border-zinc-800 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-red-600 transition"
                     />
@@ -525,7 +556,7 @@ export default function AdminPage() {
                       <Users className="inline h-3 w-3 mr-1" />Ticket Price (₱)
                     </label>
                     <input
-                      name="ticket_price"
+                      name="ticketPrice"
                       type="number"
                       min={0}
                       step="0.01"
@@ -569,7 +600,7 @@ export default function AdminPage() {
               </h2>
               <button
                 type="button"
-                onClick={() => { setIsCSOpen(false); setCsPreviewUrl(null) }}
+                onClick={() => { setIsCSOpen(false); setCsPreviewUrl(null); setCsPosterFile(null) }}
                 className="p-1.5 text-neutral-400 hover:text-white rounded-lg hover:bg-zinc-800 transition cursor-pointer"
               >
                 <X className="h-5 w-5" />
@@ -609,7 +640,7 @@ export default function AdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Duration (min)</label>
                   <input
-                    name="duration_minutes"
+                    name="durationMinutes"
                     type="number"
                     min={1}
                     placeholder="120"
@@ -622,7 +653,7 @@ export default function AdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Release Date</label>
                   <input
-                    name="release_date"
+                    name="releaseDate"
                     type="date"
                     className="w-full px-3 py-2.5 rounded-xl bg-black border border-zinc-800 text-sm text-neutral-100 focus:outline-none focus:border-violet-600 transition"
                   />
@@ -630,7 +661,7 @@ export default function AdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Est. Ticket Price (₱)</label>
                   <input
-                    name="ticket_price"
+                    name="ticketPrice"
                     type="number"
                     min={0}
                     step="0.01"
@@ -644,7 +675,7 @@ export default function AdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Director</label>
                   <input
-                    name="directed_by"
+                    name="directedBy"
                     placeholder="e.g. Denis Villeneuve"
                     className="w-full px-3 py-2.5 rounded-xl bg-black border border-zinc-800 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-violet-600 transition"
                   />
@@ -652,7 +683,7 @@ export default function AdminPage() {
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Cast</label>
                   <input
-                    name="cast_list"
+                    name="cast"
                     placeholder="e.g. Timothée Chalamet, …"
                     className="w-full px-3 py-2.5 rounded-xl bg-black border border-zinc-800 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-violet-600 transition"
                   />
@@ -660,18 +691,47 @@ export default function AdminPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Poster Image URL</label>
+                <label className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">Movie Poster</label>
+                <label
+                  htmlFor="poster-upload-cs"
+                  className="flex flex-col items-center justify-center w-full h-32 rounded-xl border-2 border-dashed border-zinc-700 hover:border-violet-500 bg-black cursor-pointer transition group"
+                >
+                  {csPreviewUrl ? (
+                    <img src={csPreviewUrl} alt="Preview" className="w-full h-full object-cover rounded-xl" />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2 text-neutral-500 group-hover:text-neutral-300 transition">
+                      <ImageIcon className="h-8 w-8" />
+                      <span className="text-xs font-semibold">Click to upload poster</span>
+                      <span className="text-[10px]">JPG, PNG, WEBP</span>
+                    </div>
+                  )}
+                </label>
                 <input
-                  name="poster_url"
-                  type="url"
-                  placeholder="https://…"
-                  onChange={(e) => setCsPreviewUrl(e.target.value || null)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-black border border-zinc-800 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-violet-600 transition"
+                  id="poster-upload-cs"
+                  name="poster"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null
+                    setCsPosterFile(file)
+                    if (file) {
+                      const reader = new FileReader()
+                      reader.onload = (ev) => setCsPreviewUrl(ev.target?.result as string)
+                      reader.readAsDataURL(file)
+                    } else {
+                      setCsPreviewUrl(null)
+                    }
+                  }}
                 />
                 {csPreviewUrl && (
-                  <div className="mt-2 rounded-xl overflow-hidden border border-zinc-800 w-24 h-32">
-                    <img src={csPreviewUrl} alt="Preview" className="w-full h-full object-cover" onError={() => setCsPreviewUrl(null)} />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setCsPreviewUrl(null); setCsPosterFile(null) }}
+                    className="text-[10px] text-rose-400 hover:text-rose-300 font-semibold transition cursor-pointer"
+                  >
+                    Remove poster
+                  </button>
                 )}
               </div>
 
