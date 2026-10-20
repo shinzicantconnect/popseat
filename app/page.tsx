@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import {
   Film,
@@ -21,6 +22,9 @@ import {
 } from 'lucide-react'
 import { AuthButton } from '@/components/auth-button'
 import { PopSeatLogo } from '@/components/pop-seat-logo'
+import { HeroAuthCta } from '@/components/home/hero-auth-cta'
+import { MiddleAuthCta } from '@/components/home/middle-auth-cta'
+import { PreFooterCta } from '@/components/home/pre-footer-cta'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -34,7 +38,9 @@ export default async function HomePage() {
     const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
-    isLoggedIn = !!user
+    const cookieStore = await cookies()
+    const popseatCookie = cookieStore.get('popseat_user')
+    isLoggedIn = !!user || !!popseatCookie?.value
 
     // 1. Fetch all movies
     const { data: movieData } = await supabase
@@ -185,25 +191,7 @@ export default async function HomePage() {
               <ArrowDown className="w-4 h-4 text-white animate-bounce" />
             </a>
 
-            {!isLoggedIn && (
-              <>
-                <Link
-                  href="/login"
-                  className="px-6 py-3.5 rounded-2xl bg-zinc-900/90 hover:bg-zinc-850 border border-zinc-800 text-white font-bold text-sm tracking-wide backdrop-blur-md transition-all flex items-center gap-2 cursor-pointer shadow-lg hover:border-zinc-700"
-                >
-                  <LogIn className="w-4 h-4 text-red-500" />
-                  <span>Sign In to PopSeat</span>
-                </Link>
-
-                <Link
-                  href="/login?mode=signup"
-                  className="px-6 py-3.5 rounded-2xl bg-red-950/30 hover:bg-red-900/40 border border-red-800/40 text-red-400 font-bold text-sm tracking-wide backdrop-blur-md transition-all flex items-center gap-2 cursor-pointer shadow-lg hover:border-red-700/60"
-                >
-                  <UserPlus className="w-4 h-4" />
-                  <span>Create Account</span>
-                </Link>
-              </>
-            )}
+            <HeroAuthCta />
           </div>
 
           {/* Quick Cinema Guarantees Ribbon */}
@@ -322,14 +310,7 @@ export default async function HomePage() {
               >
                 Book Your Seats
               </a>
-              {!isLoggedIn && (
-                <Link
-                  href="/login?mode=signup"
-                  className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-neutral-200 hover:text-white font-bold text-xs uppercase tracking-wider text-center transition cursor-pointer"
-                >
-                  Register Account
-                </Link>
-              )}
+              <MiddleAuthCta />
             </div>
           </div>
         </div>
@@ -612,40 +593,14 @@ export default async function HomePage() {
         )}
       </main>
 
-      {/* Pre-Footer Action Banner */}
-      <section className="py-16 border-t border-zinc-900 bg-black">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <div className="inline-flex p-3 rounded-2xl bg-red-950/40 border border-red-800/40 text-red-400">
-            <Ticket className="w-8 h-8" />
-          </div>
-          <h2 className="text-3xl font-black text-white tracking-tight">
-            Ready to Catch the Next Screening?
-          </h2>
-          <p className="text-xs sm:text-sm text-neutral-400 max-w-lg mx-auto leading-relaxed">
-            Create your account today or sign in to save your electronic passes and access fast-track booking.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/login?mode=signup"
-              className="px-6 py-3 rounded-2xl bg-red-700 hover:bg-red-600 text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer shadow-lg shadow-red-950/50"
-            >
-              Register Now
-            </Link>
-            <Link
-              href="/login"
-              className="px-6 py-3 rounded-2xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 text-neutral-300 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
-            >
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Pre-Footer Action Banner (Client-reactive to login state) */}
+      <PreFooterCta />
 
       {/* Footer */}
       <footer className="border-t border-zinc-800 py-8 bg-black text-xs text-neutral-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <PopSeatLogo className="h-5 text-sm" />
+            <PopSeatLogo className="h-7" />
             <span>— Next-Generation Cinema Reservation</span>
           </div>
           <p>© {new Date().getFullYear()} PopSeat Cinema System. All rights reserved.</p>

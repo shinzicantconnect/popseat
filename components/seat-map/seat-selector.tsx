@@ -103,6 +103,25 @@ export function SeatSelector({
     return () => window.removeEventListener('popseat-auth-change', handleAuthChange)
   }, [])
 
+  // Restore pending seats chosen prior to login/registration redirect
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const pending = sessionStorage.getItem(`popseat_pending_seats_${showtimeId}`)
+        if (pending) {
+          const parsed = JSON.parse(pending)
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setSelectedSeatIds(parsed.filter((id: string) => !reservedSeats.includes(id)))
+            setIsLocked(true)
+          }
+          sessionStorage.removeItem(`popseat_pending_seats_${showtimeId}`)
+        }
+      } catch {
+        // Ignore session restore error
+      }
+    }
+  }, [showtimeId, reservedSeats])
+
   // Re-synchronize seats whenever reservedSeats or price updates
   useEffect(() => {
     setSeats(generateInitialSeats(effectiveBasePrice, reservedSeats, effectiveVipPrice))
@@ -146,17 +165,34 @@ export function SeatSelector({
   }
 
   const handleTriggerCheckout = async () => {
+    if (selectedSeats.length === 0) return
+
+    // Require Sign In or Register Now if client tries to book without an authenticated account
+    const activeUser = currentUser || (await getPopSeatUser())
+    if (!activeUser) {
+      if (typeof window !== 'undefined' && selectedSeats.length > 0) {
+        try {
+          sessionStorage.setItem(
+            `popseat_pending_seats_${showtimeId}`,
+            JSON.stringify(selectedSeats.map((s) => s.id))
+          )
+        } catch {
+          // Ignore storage error
+        }
+      }
+      setIsCheckoutOpen(true)
+      return
+    }
+
     if (onProceedToCheckout) {
       onProceedToCheckout(selectedSeats)
       return
     }
 
-    if (selectedSeats.length === 0) return
-
     try {
       setIsProcessingStripe(true)
       const seatIds = selectedSeats.map((s) => s.id)
-      const customerEmail = currentUser?.email || 'edsimonmendoza@gmail.com'
+      const customerEmail = activeUser.email
 
       const res = await createCheckoutSession({
         showtimeId,
@@ -322,7 +358,7 @@ export function SeatSelector({
             onProceedToCheckout={handleTriggerCheckout}
             onRemoveSeat={handleRemoveSeat}
             onClearSeats={handleClearSeats}
-            isLoggedIn={true}
+            isLoggedIn={!!currentUser}
             disabled={isProcessingStripe}
             isFullyBooked={fullyBooked}
           />

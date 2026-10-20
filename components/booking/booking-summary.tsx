@@ -369,9 +369,9 @@ export function BookingSummary({
       {showCheckoutButton && (
         <div className="pt-6 space-y-3">
           {selectedSeats.length > 0 && !isLoggedIn && (
-            <div className="p-3 rounded-2xl bg-red-950/40 border border-red-800/40 text-red-300 text-xs flex items-center gap-2 animate-in fade-in duration-200">
+            <div className="p-3.5 rounded-2xl bg-red-950/40 border border-red-800/40 text-red-300 text-xs flex items-center gap-2 animate-in fade-in duration-200">
               <Lock className="w-4 h-4 text-red-400 shrink-0" />
-              <span>Account required: Sign in or register to book</span>
+              <span>Account required: Please Sign In or Register Now to book your seats</span>
             </div>
           )}
 
@@ -395,7 +395,7 @@ export function BookingSummary({
             ) : (
               <>
                 <Lock className="w-4 h-4" />
-                <span>Sign In to Book {selectedSeats.length > 0 ? `(${selectedSeats.length} Seats)` : ''}</span>
+                <span>Sign In or Register to Book {selectedSeats.length > 0 ? `(${selectedSeats.length} Seats)` : ''}</span>
                 <ChevronRight className="w-4 h-4 ml-auto" />
               </>
             )}

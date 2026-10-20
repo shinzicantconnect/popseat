@@ -44,22 +44,18 @@ export async function createCheckoutSession(
     movieTitle = showtimeIdOrParams.movieTitle || 'PopSeat Cinema Tickets'
     seats = showtimeIdOrParams.seats || []
     totalPrice = Number(showtimeIdOrParams.totalPrice) || 0
-    customerEmail =
-      showtimeIdOrParams.customerEmail?.trim()
-        ? showtimeIdOrParams.customerEmail.trim()
-        : 'edsimonmendoza@gmail.com'
+    customerEmail = showtimeIdOrParams.customerEmail?.trim() || ''
   } else {
     showtimeId = showtimeIdOrParams
     movieTitle = movieTitleArg || 'PopSeat Cinema Tickets'
     seats = seatsArg || []
     totalPrice = Number(totalPriceArg) || 0
-    customerEmail =
-      customerEmailArg?.trim() ? customerEmailArg.trim() : 'edsimonmendoza@gmail.com'
+    customerEmail = customerEmailArg?.trim() || ''
   }
 
-  // Ensure valid email fallback
+  // Ensure valid account email is provided
   if (!customerEmail || !customerEmail.includes('@')) {
-    customerEmail = 'edsimonmendoza@gmail.com'
+    throw new Error('A signed-in account is required to create a booking checkout session.')
   }
 
   // ── Derive origin dynamically from request headers ──────────────────────

@@ -79,10 +79,71 @@ export function setPopSeatLocalUser(user: PopSeatUser | null) {
   if (typeof window === 'undefined') return
   if (user) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+    try {
+      document.cookie = `popseat_user=${encodeURIComponent(JSON.stringify(user))}; path=/; max-age=2592000; SameSite=Lax`
+    } catch {
+      // Ignore cookie errors
+    }
     window.dispatchEvent(new Event('popseat-auth-change'))
   } else {
     localStorage.removeItem(STORAGE_KEY)
+    try {
+      document.cookie = 'popseat_user=; path=/; max-age=0; SameSite=Lax'
+    } catch {
+      // Ignore cookie errors
+    }
     window.dispatchEvent(new Event('popseat-auth-change'))
   }
 }
+
+import { useState, useEffect } from 'react'
+
+export function usePopSeatAuth() {
+  const [user, setUser] = useState<PopSeatUser | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let isMounted = true
+
+    const syncAuth = async () => {
+      try {
+        const u = await getPopSeatUser()
+        if (isMounted) {
+          setUser(u)
+          setLoading(false)
+        }
+      } catch {
+        if (isMounted) setLoading(false)
+      }
+    }
+
+    syncAuth()
+
+    const handleAuthChange = () => {
+      syncAuth()
+    }
+
+    window.addEventListener('popseat-auth-change', handleAuthChange)
+
+    let subscription: { unsubscribe: () => void } | null = null
+    try {
+      const supabase = createClient()
+      const { data } = supabase.auth.onAuthStateChange(() => {
+        syncAuth()
+      })
+      subscription = data?.subscription || null
+    } catch {
+      // Continue
+    }
+
+    return () => {
+      isMounted = false
+      window.removeEventListener('popseat-auth-change', handleAuthChange)
+      subscription?.unsubscribe()
+    }
+  }, [])
+
+  return { user, isLoggedIn: !!user, loading }
+}
+
 

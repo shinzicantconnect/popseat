@@ -116,10 +116,12 @@ export function CheckoutModal({
     e.preventDefault()
     setErrorMessage(null)
 
-    // If no active session, ensure email defaults to edsimonmendoza@gmail.com
+    // Strictly require active authenticated account before checkout
     const activeUser = await getPopSeatUser()
-    if (!activeUser && !email.trim()) {
-      setEmail('edsimonmendoza@gmail.com')
+    if (!activeUser) {
+      setCurrentUser(null)
+      setErrorMessage('Account required: Please Sign In or Register Now to complete your booking.')
+      return
     }
 
     if (!fullName.trim()) {
@@ -309,7 +311,7 @@ export function CheckoutModal({
                 className="w-full py-3 px-6 rounded-2xl bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-neutral-200 hover:text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer"
               >
                 <UserPlus className="w-4 h-4 text-red-400" />
-                <span>Create New Account</span>
+                <span>Register Now</span>
               </Link>
             </div>
 
