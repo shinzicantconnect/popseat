@@ -1,4 +1,4 @@
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient } from '@supabase/ssr' // Server Side Rendering
 
 export function createClient() {
   const supabaseUrl =
@@ -9,4 +9,5 @@ export function createClient() {
     'placeholder-key'
 
   return createBrowserClient(supabaseUrl, supabaseKey)
-}
+}
+

@@ -1,25 +1,24 @@
-// lib/actions/create-booking.ts
-'use server'
+'use server' 
 
 import { createClient } from '@/lib/supabase/server'
-import { redis } from '@/lib/redis'
-import { revalidatePath } from 'next/cache'
+import { redis } from '@/lib/redis' 
+import { revalidatePath } from 'next/cache' // is a built-in function that clears (purges) the cached data for a specific web page or route path on the server.
 
-export interface CreateBookingParams {
-  showtimeId: string
-  seats: string[]
-  totalPrice: number
-  customerEmail?: string
+export interface CreateBookingParams {  
+  showtimeId: string 
+  seats: string[] 
+  totalPrice: number 
+  customerEmail?: string 
 }
 
-export async function createBooking({
-  showtimeId,
-  seats,
-  totalPrice,
-  customerEmail
-}: CreateBookingParams) {
-  if (!customerEmail || !customerEmail.trim() || !customerEmail.includes('@')) {
-    throw new Error('A verified account is required to reserve cinema seats.')
+export async function createBooking({ 
+  showtimeId, 
+  seats, 
+  totalPrice, 
+  customerEmail 
+}: CreateBookingParams) { 
+  if (!customerEmail || !customerEmail.trim() || !customerEmail.includes('@')) { // checks if the customer email is valid
+    throw new Error('A verified account is required to reserve cinema seats.') // throws an error if the customer email is invalid
   }
 
   // Generate a unique booking reference code

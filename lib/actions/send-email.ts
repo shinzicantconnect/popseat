@@ -30,7 +30,7 @@ export async function sendTicketEmail({
   startTime,
 }: SendTicketEmailParams) {
   const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) {
+  if (!apiKey) {                                                                                                                      // if apikey is empty, considering it true
     console.warn('[sendTicketEmail] RESEND_API_KEY is not set — skipping email.')
     return { success: false, error: 'RESEND_API_KEY not configured' }
   }

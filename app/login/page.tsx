@@ -125,7 +125,6 @@ function LoginForm() {
           // Fall through to seamless local persistence
         }
 
-        // Register account in persistent registry so it is always accepted
         saveStoredAccount({
           id: createdUserId,
           email: cleanEmail,

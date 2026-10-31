@@ -1,31 +1,31 @@
-'use server'
+'use server' 
 
 import { createClient } from '@/lib/supabase/server'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath } from 'next/cache' 
 
-// Admin client that bypasses RLS using the anon key against open policies
-function getAdminClient() {
+
+function getAdminClient() { // defines the function to get the admin client
   const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' // SUPABASE_URL is the URL of the Supabase database
   const supabaseKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
-    'placeholder-key'
-  return createSupabaseClient(supabaseUrl, supabaseKey)
+    'placeholder-key' // SUPABASE_PUBLISHABLE_KEY is the publishable key of the Supabase database
+  return createSupabaseClient(supabaseUrl, supabaseKey) 
 }
 
-export async function addComingSoonAction(input: FormData) {
+export async function addComingSoonAction(input: FormData) { 
   try {
-    const supabase = getAdminClient()
+    const supabase = getAdminClient() // gets the admin client
 
-    const title = input.get('title') as string
-    const description = input.get('description') as string
-    const genre = (input.get('genre') as string) || 'General Cinema'
+    const title = input.get('title') as string 
+    const description = input.get('description') as string 
+    const genre = (input.get('genre') as string) || 'General Cinema' 
     const rawDuration = input.get('durationMinutes') as string
-    const durationMinutes = parseInt(rawDuration || '120', 10) || 120
+    const durationMinutes = parseInt(rawDuration || '120', 10) || 120 
     const releaseDate = (input.get('releaseDate') as string) || ''
-    const ticketPrice = parseFloat((input.get('ticketPrice') as string) || '300')
+    const ticketPrice = parseFloat((input.get('ticketPrice') as string) || '300') 
     const directedBy = (input.get('directedBy') as string) || ''
     const cast = (input.get('cast') as string) || ''
     const posterFile = input.get('poster') as File | null
